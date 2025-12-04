@@ -2,14 +2,17 @@ import streamlit as st
 import pandas as pd
 import shap
 import matplotlib.pyplot as plt
+import sys
 from pathlib import Path
-from streamlit_shap import st_shap
 import seaborn as sns
-from sklearn.metrics import confusion_matrix, roc_curve
+from sklearn.metrics import confusion_matrix,roc_curve
+from streamlit_shap import st_shap
 
-# ==============================
+
+
+
 # FIX PYTHON PATH FOR src/
-# ==============================
+
 ROOT = Path(__file__).resolve().parents[1]
 
 from src.inference import (
@@ -19,21 +22,25 @@ from src.inference import (
     explain_single
 )
 
-# ==============================
+
+
+
 # LOAD MODEL ONCE
-# ==============================
+
 model = load_model()
 
-# ==============================
+
+
 # STREAMLIT PAGE SETTINGS
-# ==============================
+
 st.set_page_config(page_title="Credit Default Predictor", layout="wide")
 st.title("📊 Credit Card Default Risk Prediction App")
 st.write("Enter customer data to predict default probability and view explanations.")
 
-# ==============================
+
+
 # FORM INPUTS
-# ==============================
+
 with st.form("customer_form"):
     st.header("Basic Information")
     
@@ -41,19 +48,13 @@ with st.form("customer_form"):
     AGE = st.number_input("Age", 18, 100, 30)
 
     SEX = st.selectbox("Sex (1 = Male, 2 = Female)", [1, 2])
-    EDUCATION = st.selectbox(
-        "Education (1 = Graduate, 2 = University, 3 = High School, 4 = Others)",
-        [1, 2, 3, 4]
-    )
-    MARRIAGE = st.selectbox(
-        "Marriage (1 = Married, 2 = Single, 3 = Others)",
-        [1, 2, 3]
-    )
+    EDUCATION = st.selectbox("Education (1 = Graduate, 2 = University, 3 = High School, 4 = Others)", [1, 2, 3, 4])
+    MARRIAGE = st.selectbox("Marriage (1 = Married, 2 = Single, 3 = Others)", [1, 2, 3])
 
     st.header("Payment Status (Past 6 Months)")
     PAY_0 = st.number_input("PAY_0", -2, 8, 0)
     PAY_2 = st.number_input("PAY_2", -2, 8, 0)
-    PAY_3 = st.number_number_input("PAY_3", -2, 8, 0)
+    PAY_3 = st.number_input("PAY_3", -2, 8, 0)
     PAY_4 = st.number_input("PAY_4", -2, 8, 0)
     PAY_5 = st.number_input("PAY_5", -2, 8, 0)
     PAY_6 = st.number_input("PAY_6", -2, 8, 0)
@@ -76,9 +77,10 @@ with st.form("customer_form"):
 
     submit = st.form_submit_button("Predict Default Risk")
 
-# ==============================
-# PROCESS INPUT AND DISPLAY TABS
-# ==============================
+
+
+# PROCESS INPUT AND DISPLAY TABS AFTER SUBMIT
+
 if submit:
     input_data = {
         "LIMIT_BAL": LIMIT_BAL, "SEX": SEX, "EDUCATION": EDUCATION,
@@ -94,23 +96,30 @@ if submit:
 
     result = predict_single(input_data, model)
 
+    # Preprocess row for shap
     df_final = preprocess_input(pd.DataFrame([input_data]))
 
+    # SHAP explainer
     explainer, shap_values = explain_single(df_final, model)
 
+    # Create tabs
     tab1, tab2, tab3 = st.tabs([
-        "🔮 Prediction",
-        "📘 SHAP Explanation",
-        "📊 Global Feature Importance"
+    "🔮 Prediction", 
+    "📘 SHAP Explanation", 
+    "📊 Global Feature Importance"
     ])
 
-    # TAB 1 — Prediction
+
+    
+    # TAB 1 — PREDICTION
+    
     with tab1:
         st.subheader("📌 Prediction Result")
 
         prob = result["probability"]
         pred = result["prediction"]
 
+        # Risk color
         if prob < 0.30:
             color = "green"
             level = "Low Risk"
@@ -125,11 +134,13 @@ if submit:
         st.markdown(f"### Prediction: **{'Default (1)' if pred==1 else 'No Default (0)'}**")
         st.markdown(f"### Risk Level: <span style='color:{color}; font-size:24px;'>{level}</span>", unsafe_allow_html=True)
 
-    # TAB 2 — SHAP Local Explanation
+    
+    # TAB 2 — SHAP LOCAL EXPLANATION
+    
     with tab2:
         st.subheader("🔍 SHAP Force Plot (Local Explanation)")
 
-        shap.initjs()  # ONLY here
+        shap.initjs()
 
         force_plot = shap.force_plot(
             explainer.expected_value,
@@ -139,7 +150,11 @@ if submit:
 
         st_shap(force_plot, height=300)
 
-    # TAB 3 — Feature Importance
+
+    
+    # TAB 3 — SHAP GLOBAL FEATURE IMPORTANCE
+    
+
     with tab3:
         st.subheader("📊 Global Feature Importance (Ranked & Styled)")
 
@@ -151,18 +166,17 @@ if submit:
             "importance": importance
         }).sort_values("importance", ascending=False).head(15)
 
-        fig, ax = plt.subplots(figsize=(12, 8))
+        fig, ax = plt.subplots(figsize=(12,8))
         bars = ax.barh(imp_df["feature"], imp_df["importance"], color="skyblue")
         ax.invert_yaxis()
         ax.set_xlabel("Importance", fontsize=12)
         ax.set_title("Top 15 Important Features", fontsize=14)
 
-        for bar in bars:
-            ax.text(
-                bar.get_width() + 0.001,
-                bar.get_y() + bar.get_height() / 2,
-                f"{bar.get_width():.3f}",
-                va="center"
-            )
+        # Add value labels
+        for i, bar in enumerate(bars):
+            ax.text(bar.get_width() + 0.001, bar.get_y() + 0.25,
+                    f"{bar.get_width():.3f}",
+                    fontsize=10)
 
         st.pyplot(fig)
+    
