@@ -130,17 +130,14 @@ if submit:
 
     # ---- TAB 2 ----
     with tab2:
-        st.subheader("🔍 SHAP Force Plot (Local Explanation)")
+        st.subheader("🔍 SHAP Waterfall Plot (Local Explanation)")
 
-        shap.initjs()
+        shap_values_single = shap_values[0]
 
-        force_plot = shap.force_plot(
-            explainer.expected_value,
-            shap_values[0],
-            df_final
-        )
+        fig, ax = plt.subplots(figsize=(10, 6))
+        shap.plots.waterfall(shap_values_single, max_display=20)
+        st.pyplot(fig)
 
-        st_shap(force_plot, height=300)
 
     # ---- TAB 3 ----
     with tab3:
