@@ -140,8 +140,6 @@ if submit:
     with tab2:
         st.subheader("🔍 SHAP Force Plot (Local Explanation)")
 
-        shap.initjs()
-
         force_plot = shap.force_plot(
             explainer.expected_value,
             shap_values[0],
