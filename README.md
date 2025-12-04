@@ -16,7 +16,7 @@ pip install -r requirements.txt
 ## 2️⃣ Start the Streamlit app
 ```
 cd app
-streamlit run app.py
+python -m streamlit run app/app.py
 ```
 
 The app will automatically open in your browser.
