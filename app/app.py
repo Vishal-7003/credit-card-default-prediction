@@ -13,7 +13,10 @@ from streamlit_shap import st_shap
 
 # FIX PYTHON PATH FOR src/
 
+# FIX PYTHON PATH FOR src/
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
+sys.path.append(str(ROOT / "src"))
 
 from src.inference import (
     load_model,
