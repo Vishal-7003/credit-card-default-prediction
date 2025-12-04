@@ -6,14 +6,22 @@ import sys
 from pathlib import Path
 import seaborn as sns
 from sklearn.metrics import confusion_matrix,roc_curve
+from streamlit_shap import st_shap
+shap.initjs()
+
+
 # ==============================
 # FIX PYTHON PATH FOR src/
 # ==============================
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.append(str(ROOT))
-sys.path.append(str(ROOT / "src"))
 
-from inference import load_model, preprocess_input, predict_single, explain_single
+from src.inference import (
+    load_model,
+    preprocess_input,
+    predict_single,
+    explain_single
+)
+
 
 
 # ==============================
@@ -40,8 +48,8 @@ with st.form("customer_form"):
     AGE = st.number_input("Age", 18, 100, 30)
 
     SEX = st.selectbox("Sex (1 = Male, 2 = Female)", [1, 2])
-    EDUCATION = st.selectbox("Education (1–4)", [1, 2, 3, 4])
-    MARRIAGE = st.selectbox("Marriage (1–3)", [1, 2, 3])
+    EDUCATION = st.selectbox("Education (1 = Graduate, 2 = University, 3 = High School, 4 = Others)", [1, 2, 3, 4])
+    MARRIAGE = st.selectbox("Marriage (1 = Married, 2 = Single, 3 = Others)", [1, 2, 3])
 
     st.header("Payment Status (Past 6 Months)")
     PAY_0 = st.number_input("PAY_0", -2, 8, 0)
@@ -70,9 +78,9 @@ with st.form("customer_form"):
     submit = st.form_submit_button("Predict Default Risk")
 
 
-# ============================================
+
 # PROCESS INPUT AND DISPLAY TABS AFTER SUBMIT
-# ============================================
+
 if submit:
     input_data = {
         "LIMIT_BAL": LIMIT_BAL, "SEX": SEX, "EDUCATION": EDUCATION,
@@ -102,9 +110,9 @@ if submit:
     ])
 
 
-    # =====================================
+    
     # TAB 1 — PREDICTION
-    # =====================================
+    
     with tab1:
         st.subheader("📌 Prediction Result")
 
@@ -126,25 +134,26 @@ if submit:
         st.markdown(f"### Prediction: **{'Default (1)' if pred==1 else 'No Default (0)'}**")
         st.markdown(f"### Risk Level: <span style='color:{color}; font-size:24px;'>{level}</span>", unsafe_allow_html=True)
 
-    # =====================================
+    
     # TAB 2 — SHAP LOCAL EXPLANATION
-    # =====================================
+    
     with tab2:
         st.subheader("🔍 SHAP Force Plot (Local Explanation)")
 
-        fig = shap.force_plot(
+        shap.initjs()
+
+        force_plot = shap.force_plot(
             explainer.expected_value,
             shap_values[0],
-            df_final,
-            matplotlib=True,
-            show=False
+            df_final
         )
-        st.pyplot(fig)
+
+        st_shap(force_plot, height=300)
 
 
-    # =====================================
+    
     # TAB 3 — SHAP GLOBAL FEATURE IMPORTANCE
-    # =====================================
+    
 
     with tab3:
         st.subheader("📊 Global Feature Importance (Ranked & Styled)")

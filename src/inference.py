@@ -27,7 +27,7 @@ def preprocess_input(df_raw: pd.DataFrame) -> pd.DataFrame:
 
     df_clean = preprocess_raw_data(df_raw)
     df_final = apply_advanced_features(df_clean)
-    return df_final
+    return df_final.astype(float)
 
 def predict_single(input_dict: dict, model=None, threshold: float = 0.5):
     # Load model if not passed
