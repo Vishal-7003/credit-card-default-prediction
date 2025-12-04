@@ -7,12 +7,12 @@ from pathlib import Path
 import seaborn as sns
 from sklearn.metrics import confusion_matrix,roc_curve
 from streamlit_shap import st_shap
-shap.initjs()
 
 
-# ==============================
+
+
 # FIX PYTHON PATH FOR src/
-# ==============================
+
 ROOT = Path(__file__).resolve().parents[1]
 
 from src.inference import (
@@ -24,23 +24,23 @@ from src.inference import (
 
 
 
-# ==============================
+
 # LOAD MODEL ONCE
-# ==============================
+
 model = load_model()
 
 
-# ==============================
+
 # STREAMLIT PAGE SETTINGS
-# ==============================
+
 st.set_page_config(page_title="Credit Default Predictor", layout="wide")
 st.title("📊 Credit Card Default Risk Prediction App")
 st.write("Enter customer data to predict default probability and view explanations.")
 
 
-# ==============================
+
 # FORM INPUTS
-# ==============================
+
 with st.form("customer_form"):
     st.header("Basic Information")
     
