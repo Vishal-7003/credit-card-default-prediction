@@ -10,11 +10,11 @@ from streamlit_shap import st_shap
 
 
 
-# ==============================
-# FIX PYTHON PATH FOR src/
-# ==============================
-ROOT = Path(__file__).resolve().parents[1]
 
+# FIX PYTHON PATH FOR src/
+
+ROOT = Path(__file__).resolve().parents[1]
+sys.path.append(str(ROOT))
 from src.inference import (
     load_model,
     preprocess_input,
@@ -24,23 +24,23 @@ from src.inference import (
 
 
 
-# ==============================
+
 # LOAD MODEL ONCE
-# ==============================
+
 model = load_model()
 
 
-# ==============================
+
 # STREAMLIT PAGE SETTINGS
-# ==============================
+
 st.set_page_config(page_title="Credit Default Predictor", layout="wide")
 st.title("📊 Credit Card Default Risk Prediction App")
 st.write("Enter customer data to predict default probability and view explanations.")
 
 
-# ==============================
+
 # FORM INPUTS
-# ==============================
+
 with st.form("customer_form"):
     st.header("Basic Information")
     
@@ -78,9 +78,9 @@ with st.form("customer_form"):
     submit = st.form_submit_button("Predict Default Risk")
 
 
-# ============================================
+
 # PROCESS INPUT AND DISPLAY TABS AFTER SUBMIT
-# ============================================
+
 if submit:
     input_data = {
         "LIMIT_BAL": LIMIT_BAL, "SEX": SEX, "EDUCATION": EDUCATION,
@@ -110,9 +110,9 @@ if submit:
     ])
 
 
-    # =====================================
+    
     # TAB 1 — PREDICTION
-    # =====================================
+    
     with tab1:
         st.subheader("📌 Prediction Result")
 
@@ -134,9 +134,9 @@ if submit:
         st.markdown(f"### Prediction: **{'Default (1)' if pred==1 else 'No Default (0)'}**")
         st.markdown(f"### Risk Level: <span style='color:{color}; font-size:24px;'>{level}</span>", unsafe_allow_html=True)
 
-    # =====================================
+    
     # TAB 2 — SHAP LOCAL EXPLANATION
-    # =====================================
+    
     with tab2:
         st.subheader("🔍 SHAP Force Plot (Local Explanation)")
 
@@ -149,9 +149,9 @@ if submit:
         st_shap(force_plot, height=300)
 
 
-    # =====================================
+    
     # TAB 3 — SHAP GLOBAL FEATURE IMPORTANCE
-    # =====================================
+    
     with tab3:
         st.subheader("📊 Global Feature Importance (Ranked & Styled)")
 
