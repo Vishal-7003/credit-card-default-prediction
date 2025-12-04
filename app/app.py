@@ -7,7 +7,7 @@ from pathlib import Path
 import seaborn as sns
 from sklearn.metrics import confusion_matrix,roc_curve
 from streamlit_shap import st_shap
-shap.initjs()
+
 
 
 # ==============================
