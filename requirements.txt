@@ -6,3 +6,5 @@ xgboost>=2.0,<2.1
 shap>=0.50,<0.51
 streamlit-shap
 joblib
+matplotlib
+seaborn
